@@ -17,6 +17,8 @@
                 <p>{{ $post->body }}</p>
             </div>
         </div>
+        <a href="/categories/{{ $post->category->id }}">{{ $post->category->name }}</a>
+        <p></p>
         <div class="edit">
             <a href="/posts/{{ $post->id }}/edit">edit</a>
         </div>
