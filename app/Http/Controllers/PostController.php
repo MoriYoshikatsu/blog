@@ -11,7 +11,22 @@ class PostController extends Controller
 {
     public function index(Post $post)
     {   
-        return view('posts.index')->with(['posts' => $post->getPaginateByLimit(5)]);
+        $client = new \GuzzleHttp\Client();
+        
+        $url = 'https://teratail.com/api/v1/questions';
+        
+        $response = $client->request(
+            'GET',
+            $url,
+            ['Bearer' => config('services.teratail.token')]
+        );
+        
+        $questions = json_decode($response->getBody(), true);
+        
+        return view('posts.index')->with([
+            'posts' => $post->getPaginateByLimit(),
+            'questions' => $questions['questions'],
+        ]);
     }
     
     public function show(Post $post)
@@ -24,9 +39,10 @@ class PostController extends Controller
         return view('posts.create')->with(['categories' => $category->get()]);
     }
     
-    public function store(Post $post, PostRequest $request, )
+    public function store(Post $post, PostRequest $request)
     {
         $input = $request['post'];
+        $input += ['user_id' => $request->user()->id];
         $post->fill($input)->save();
         return redirect('/posts/' . $post->id);
     }
@@ -39,8 +55,8 @@ class PostController extends Controller
     public function update(PostRequest $request, Post $post)
     {
         $input_post = $request['post'];
+        $input_post += ['user_id' => $request-user()->id];
         $post->fill($input_post)->save();
-        
         return redirect('/posts/' . $post->id);
     }
     
